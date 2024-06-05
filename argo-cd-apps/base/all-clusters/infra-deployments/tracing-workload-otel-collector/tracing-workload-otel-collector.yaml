@@ -15,9 +15,11 @@ spec:
               values:
                 sourceRoot: components/tracing/otel-collector
                 environment: staging
-                clusterDir: ""
+                clusterDir: "base"
           - list:
-              elements: []
+              elements:
+                - nameNormalized: kflux-stg-es01
+                  values.clusterDir: kflux-stg-es01
   template:
     metadata:
       name: tracing-workload-otel-collector-{{nameNormalized}}
