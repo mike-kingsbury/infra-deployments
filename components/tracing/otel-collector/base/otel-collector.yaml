@@ -37,7 +37,7 @@ spec:
           #releaseName: open-telemetry
           # Values for chart from git
         - repoURL: https://github.com/mike-kingsbury/infra-deployments.git
-          targetRevision: tracing
+          targetRevision: preview-tracing
           ref: values
       destination:
         namespace: konflux-otel
