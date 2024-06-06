@@ -62,7 +62,7 @@ main() {
         fi
         ;;
     "preview")
-        $ROOT/hack/preview.sh $toolchain $keycloak $obo $eaas
+        bash -x $ROOT/hack/preview.sh $toolchain $keycloak $obo $eaas
         ;;
     esac
 
