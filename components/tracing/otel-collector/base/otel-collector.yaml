@@ -33,7 +33,7 @@ spec:
               - name: "mode"
                 value: deployment
             valueFiles:
-            - $values/components/tracing/otel-collector/{{environment}}/otel-collector-helm-values.yaml
+            - $values/components/tracing/otel-collector/{{values.environment}}/otel-collector-helm-values.yaml
           #releaseName: open-telemetry
           # Values for chart from git
         - repoURL: https://github.com/mike-kingsbury/infra-deployments.git

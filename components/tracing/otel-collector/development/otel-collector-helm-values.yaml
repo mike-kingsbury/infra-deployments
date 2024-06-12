@@ -27,7 +27,7 @@ config:
           value: ${env:HOSTNAME}
         - key: collector.clustername
           action: insert
-          value: dev
+          value: dev-test
   receivers:
     jaeger: null
     prometheus: null
