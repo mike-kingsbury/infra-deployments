@@ -9,11 +9,5 @@ patches:
       kind: Application
       group: argoproj.io
       version: v1alpha1
-#  - path: patch-delete-external-secrets.yaml
-#    target:
-#      name: honeycomb-api-key
-#      kind: ExternalSecret
-#      group: external-secrets.io
-#      version: v1beta1
 patchesStrategicMerge:
   - patch-delete-external-secrets.yaml
