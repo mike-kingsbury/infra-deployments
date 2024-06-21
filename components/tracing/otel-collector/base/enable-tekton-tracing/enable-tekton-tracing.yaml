@@ -1,38 +1,8 @@
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: enable-tekton-tracing
-spec:
-  generators:
-    - merge:
-        mergeKeys:
-          - nameNormalized
-        generators:
-          - clusters:
-              values:
-                sourceRoot: configs/enable-tekton-tracing
-                environment: staging
-                clusterDir: ""
-          - list:
-              elements: []
-  template:
-    metadata:
-      name: enable-tekton-tracing-{{nameNormalized}}
-    spec:
-      project: default
-      source:
-        path: configs/enable-tekton-tracing
-        repoURL: https://github.com/redhat-appstudio/infra-deployments.git
-        targetRevision: main
-      destination:
-        server: '{{server}}'
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        retry:
-          limit: -1
-          backoff:
-            duration: 10s
-            factor: 2
-            maxDuration: 3m
+  name: config-tracing
+  namespace: openshift-pipelines
+data:
+  enabled: "true"
+  endpoint: "http://open-telemetry-opentelemetry-collector.konflux-otel.svc.cluster.local:4318/v1/traces"
