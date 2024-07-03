@@ -1,0 +1,1 @@
+The jaeger component is exclusively for development environments; traces in stage and production will be sent to Honeycomb and/or other solutions.

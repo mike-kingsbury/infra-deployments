@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: tracing-workload-jaeger
+  labels:
+    noSourceTransform: "true"
+spec:
+  generators:
+  - merge:
+      mergeKeys:
+        - nameNormalized
+      generators:
+        - clusters:
+            values:
+              sourceRoot: components/tracing/jaeger
+              environment: staging
+              clusterDir: ""
+        - list:
+            elements: []
+  template:
+    metadata:
+      name: tracing-workload-jaeger-{{nameNormalized}}
+    spec:
+      project: default
+      sources:
+          # Chart from Jaeger Project
+        - chart: jaeger
+          repoURL: https://jaegertracing.github.io/helm-charts
+          targetRevision: 3.1.0
+          helm:
+            parameters:
+#              - name: "image.repository"
+#                value: otel/opentelemetry-collector-k8s
+#              - name: "mode"
+#                value: deployment
+#              - name: "fullnameOverride"
+#                value: "open-telemetry-opentelemetry-collector"
+            valueFiles:
+            - $values/{{values.sourceRoot}}/{{values.environment}}/jaeger-helm-values.yaml
+          # Values for chart from git
+        - repoURL: https://github.com/redhat-appstudio/infra-deployments.git
+          targetRevision: main
+          ref: values
+      destination:
+        namespace: konflux-otel
+        server: '{{server}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 50
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m

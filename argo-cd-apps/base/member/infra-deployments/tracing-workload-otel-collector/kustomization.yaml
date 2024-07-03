@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
 - tracing-workload-otel-collector.yaml
 - tracing-workload-tracing.yaml
+- tracing-workload-jaeger.yaml
 components:
   - ../../../../k-components/deploy-to-member-cluster-merge-generator
