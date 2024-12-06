@@ -1714,8 +1714,8 @@ spec:
                 cpu: 200m
                 memory: 200Mi
               requests:
-                cpu: 10m
-                memory: 10Mi
+                cpu: 200m
+                memory: 200Mi
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
@@ -1848,6 +1848,7 @@ spec:
         aws_secret_access_key: '{{ .aws_secret_access_key }}'
         bucket: '{{ .bucket }}'
         endpoint: https://{{ .endpoint }}
+        s3_url: s3://{{ .bucket }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -1956,7 +1957,7 @@ metadata:
 spec:
   chain:
     artifacts.oci.storage: oci
-    artifacts.pipelinerun.enable-deep-inspection: true
+    artifacts.pipelinerun.enable-deep-inspection: "true"
     artifacts.pipelinerun.format: in-toto
     artifacts.pipelinerun.storage: oci
     artifacts.taskrun.format: in-toto
@@ -1999,6 +2000,9 @@ spec:
                   value: "konflux-tenants"
                   effect: "NoSchedule"
             default-timeout-minutes: "120"
+        config-leader-election-resolvers:
+          data:
+            buckets: "8"
         config-logging:
           data:
             loglevel.controller: info
@@ -2051,24 +2055,32 @@ spec:
                 - name: tekton-pipelines-controller
                   resources:
                     limits:
-                      memory: 8Gi
+                      memory: 12Gi
                     requests:
                       cpu: "1"
-                      memory: 6Gi
+                      memory: 12Gi
+                topologySpreadConstraints:
+                - labelSelector:
+                    matchLabels:
+                      app: tekton-pipelines-controller
+                  maxSkew: 1
+                  topologyKey: topology.kubernetes.io/zone
+                  whenUnsatisfiable: DoNotSchedule
         tekton-pipelines-remote-resolvers:
           spec:
-            replicas: 1
+            replicas: 4
             template:
               spec:
                 containers:
-                - name: controller
+                - args:
+                  - --threads-per-controller=32
+                  name: controller
                   resources:
                     limits:
-                      cpu: "1"
-                      memory: 16Gi
+                      memory: 8Gi
                     requests:
-                      cpu: 100m
-                      memory: 100Mi
+                      cpu: 500m
+                      memory: 8Gi
         tekton-pipelines-webhook:
           spec:
             template:
@@ -2080,8 +2092,8 @@ spec:
                       cpu: "1"
                       memory: 1Gi
                     requests:
-                      cpu: 200m
-                      memory: 200Mi
+                      cpu: 400m
+                      memory: 1Gi
       disabled: false
       horizontalPodAutoscalers:
         tekton-operator-proxy-webhook:
@@ -2119,11 +2131,11 @@ spec:
               type: Resource
             minReplicas: 6
     performance:
-      buckets: 4
+      buckets: 8
       disable-ha: false
       kube-api-burst: 50
       kube-api-qps: 50
-      replicas: 2
+      replicas: 4
       threads-per-controller: 32
   platforms:
     openshift:
@@ -2145,6 +2157,7 @@ spec:
             namespace }}/pipelinerun/{{ pr }}
           custom-console-url-pr-tasklog: https://console.redhat.com/application-pipeline/ns/{{
             namespace }}/pipelinerun/{{ pr }}/logs/{{ task }}
+          remember-ok-to-test: "false"
   profile: all
   pruner:
     disabled: false
@@ -2197,7 +2210,7 @@ metadata:
   namespace: openshift-marketplace
 spec:
   displayName: custom-operators
-  image: quay.io/openshift-pipeline/openshift-pipelines-pipelines-operator-bundle-container-index@sha256:99d1e1ba1c24d950db7147e26041193304247ed92e88788023b58eb787282a9a
+  image: quay.io/openshift-pipeline/openshift-pipelines-pipelines-operator-bundle-container-index@sha256:d34f2de74b26b384643b04e5b391dc3216289f7e351ca36e8b46e4d8b03e47ce
   sourceType: grpc
   updateStrategy:
     registryPoll:
@@ -2212,7 +2225,7 @@ metadata:
   name: openshift-pipelines-operator
   namespace: openshift-operators
 spec:
-  channel: latest
+  channel: pipelines-5.0
   name: openshift-pipelines-operator-rh
   source: custom-operators
   sourceNamespace: openshift-marketplace
