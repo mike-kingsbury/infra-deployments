@@ -1441,7 +1441,7 @@ spec:
             secretKeyRef:
               key: db.name
               name: tekton-results-database
-        image: quay.io/konflux-ci/tekton-results-api:f9ff020184f548ef6bafd3570ee1f22b1b4087d9
+        image: quay.io/konflux-ci/tekton-results-api:5482f328e3de73a72c7ea5747a9b6c2d42b974be
         livenessProbe:
           httpGet:
             path: /healthz
@@ -1546,7 +1546,7 @@ spec:
             secretKeyRef:
               key: POSTGRES_PASSWORD
               name: tekton-results-postgres
-        image: quay.io/konflux-ci/tekton-results-retention-policy-agent:f9ff020184f548ef6bafd3570ee1f22b1b4087d9
+        image: quay.io/konflux-ci/tekton-results-retention-policy-agent:5482f328e3de73a72c7ea5747a9b6c2d42b974be
         name: retention-policy-agent
         resources:
           limits:
@@ -1677,7 +1677,7 @@ spec:
           value: tekton-results-api-service.tekton-pipelines.svc.cluster.local:8080
         - name: AUTH_MODE
           value: token
-        image: quay.io/konflux-ci/tekton-results-watcher:f9ff020184f548ef6bafd3570ee1f22b1b4087d9
+        image: quay.io/konflux-ci/tekton-results-watcher:5482f328e3de73a72c7ea5747a9b6c2d42b974be
         name: watcher
         ports:
         - containerPort: 9090
@@ -1740,7 +1740,7 @@ spec:
               rotate_wait_secs: 5
               glob_minimum_cooldown_ms: 15000
               auto_partial_merge: true
-              extra_label_selector: "app.kubernetes.io/managed-by=tekton-pipelines"
+              extra_label_selector: "app.kubernetes.io/managed-by in (tekton-pipelines,pipelinesascode.tekton.dev)"
             internal_metrics:
               type: internal_metrics
           transforms:
@@ -2204,28 +2204,6 @@ spec:
                     requests:
                       cpu: 100m
                       memory: 100Mi
-        tekton-pipelines-controller:
-          spec:
-            template:
-              spec:
-                containers:
-                - name: tekton-pipelines-controller
-                  resources:
-                    limits:
-                      memory: 12Gi
-                    requests:
-                      cpu: "1"
-                      memory: 12Gi
-                topologySpreadConstraints:
-                - labelSelector:
-                    matchLabels:
-                      app: tekton-pipelines-controller
-                  maxSkew: 1
-                  topologyKey: topology.kubernetes.io/zone
-                  whenUnsatisfiable: DoNotSchedule
-        tekton-pipelines-remote-resolvers:
-          spec:
-            replicas: 4
         tekton-pipelines-webhook:
           spec:
             template:
@@ -2275,12 +2253,33 @@ spec:
                   type: Utilization
               type: Resource
             minReplicas: 6
+      statefulSets:
+        tekton-pipelines-controller:
+          spec:
+            template:
+              spec:
+                containers:
+                - name: tekton-pipelines-controller
+                  resources:
+                    limits:
+                      memory: 12Gi
+                    requests:
+                      cpu: "1"
+                      memory: 12Gi
+                topologySpreadConstraints:
+                - labelSelector:
+                    matchLabels:
+                      app: tekton-pipelines-controller
+                  maxSkew: 1
+                  topologyKey: topology.kubernetes.io/zone
+                  whenUnsatisfiable: DoNotSchedule
     performance:
-      buckets: 8
+      buckets: 4
       disable-ha: false
       kube-api-burst: 50
       kube-api-qps: 50
       replicas: 4
+      statefulset-ordinals: true
       threads-per-controller: 32
   platforms:
     openshift:
