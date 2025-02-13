@@ -66,3 +66,11 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/image
         value: "quay.io/minio/operator:v5.0.15"
+  - target:
+      kind: Deployment
+      name: minio-operator
+      namespace: minio-operator
+    patch: |
+      - op: replace
+        path: /spec/template/spec/affinity/podAntiAffinity
+        value: {}
