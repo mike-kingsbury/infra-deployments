@@ -9,8 +9,8 @@
 #    --help, -h: Print the help with options
 
 DELETE_CLUSTER=0
-MEMORY=16384
-CPUS=6
+MEMORY=48000
+CPUS=16
 ROOT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #echo $ROOT_DIR
 CRCBINARY=$(readlink -f ~/.crc/bin/crc)
@@ -66,7 +66,7 @@ fi
 #existing cluster
 
 #Start CRC with modified configs
-"$CRCBINARY" start
+"$CRCBINARY" start  --disk-size 96
 
 #Point local environment clients (kubectl and oc) to the CRC cluster
 eval $("$CRCBINARY" oc-env)
